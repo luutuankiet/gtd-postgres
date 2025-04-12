@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres
+    container_name: dell-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - TZ=Asia/Ho_Chi_Minh
+      - PGTZ="GMT+7"
+    volumes: 
+      - dell-postgres:/var/lib/postgresql/data # to persist data
+      - ./containers/postgres/postgres.conf:/etc/postgresql/postgresql.conf # config to allow other containers to connect
+      - ./containers/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d # init scripts
+      - ./shared:/shared
+    ports:
+      - "5433:5432"
+# to persist postgres data
+volumes:
+  dell-postgres:
