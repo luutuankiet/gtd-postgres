@@ -30,10 +30,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onClick }) => {
       <div className="task-header">
         <h3 className="task-title">{task.title}</h3>
         <div className="task-meta">
-          <span className={`task-priority ${getPriorityClass(task.priority)}`}>
+          <span className={`task-priority priority-${task.priority}`}>
             {task.priority}
           </span>
-          <span className={`task-status ${getStatusClass(task.status)}`}>
+          <span className={`task-status status-${task.status.replace('_', '-')}`}>
             {task.status.replace('_', ' ')}
           </span>
         </div>

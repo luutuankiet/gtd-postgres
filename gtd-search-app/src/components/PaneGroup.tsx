@@ -1,11 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useDrop } from 'react-dnd';
-import DraggableTab from './DraggableTab';
+import DraggableTab, { ITEM_TYPE, DragItem } from './DraggableTab';
 import TaskDetail from './TaskDetail';
 import { Task, PaneGroup as PaneGroupType } from '../types';
-
-// Define the drag item type
-const ITEM_TYPE = 'TAB';
 
 interface PaneGroupComponentProps {
   paneGroup: PaneGroupType;
@@ -24,18 +21,26 @@ const PaneGroupComponent: React.FC<PaneGroupComponentProps> = ({
   onMoveTask,
   onSetActiveTask
 }) => {
+  // Create a ref for the drop target
+  const dropRef = useRef<HTMLDivElement>(null);
+  
   // Set up drop target for empty pane area
-  const [{ isOver }, drop] = useDrop({
+  const [{ isOver }, drop] = useDrop<DragItem, void, { isOver: boolean }>({
     accept: ITEM_TYPE,
-    drop: (item: { taskId: string, paneId: string }) => {
+    drop: (item) => {
+      console.log(`Dropping task ${item.taskId} from pane ${item.paneId} to pane ${paneGroup.id}`);
       if (item.paneId !== paneGroup.id) {
         onMoveTask(item.taskId, item.paneId, paneGroup.id);
       }
+      // Don't return anything (or return undefined)
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
   });
+  
+  // Connect the drop ref
+  drop(dropRef);
   
   return (
     <div className="pane-group">
@@ -59,8 +64,12 @@ const PaneGroupComponent: React.FC<PaneGroupComponentProps> = ({
       </div>
       
       <div 
-        ref={drop}
-        className={`pane-content ${isOver && paneGroup.taskIds.length === 0 ? 'drop-target' : ''}`}
+        ref={dropRef}
+        className={`pane-content ${isOver ? 'drop-target' : ''}`}
+        style={{
+          backgroundColor: isOver ? 'rgba(66, 153, 225, 0.2)' : undefined,
+          border: isOver ? '2px dashed #4299e1' : undefined
+        }}
       >
         {paneGroup.activeTaskId ? (
           <TaskDetail 

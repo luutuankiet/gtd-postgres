@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import SearchBar from './SearchBar';
 import FilterPanel from './FilterPanel';
 import TaskList from './TaskList';
-import { Task, SearchParams } from '../types';
+import { Task, SearchParams, SearchFilters } from '../types';
+import './SearchView.css';
+
 
 interface SearchViewProps {
   tasks: Task[];
@@ -54,7 +56,7 @@ const SearchView: React.FC<SearchViewProps> = ({
     setLoading(false);
   }, [tasks, searchParams]);
   
-  const handleFilterChange = (filters) => {
+  const handleFilterChange = (filters: SearchFilters) => {
     onSearchChange({
       ...searchParams,
       filters

@@ -1,11 +1,12 @@
-import React from 'react';
-import { useDrag, useDrop } from 'react-dnd';
+import React, { useRef } from 'react';
+import { useDrag } from 'react-dnd';
 import { Task } from '../types';
 
-// Define the drag item type
-const ITEM_TYPE = 'TAB';
+// Define the item type constant
+export const ITEM_TYPE = 'TAB';
 
-interface DragItem {
+// Define the drag item interface
+export interface DragItem {
   type: string;
   taskId: string;
   paneId: string;
@@ -28,39 +29,34 @@ const DraggableTab: React.FC<DraggableTabProps> = ({
   onClose,
   onMove
 }) => {
-  // Set up the drag source
-  const [{ isDragging }, drag] = useDrag({
+  // Create a ref
+  const ref = useRef<HTMLDivElement>(null);
+  
+  // Set up drag source
+  const [{ isDragging }, dragRef] = useDrag({
     type: ITEM_TYPE,
-    item: { type: ITEM_TYPE, taskId: task.id, paneId },
+    item: () => {
+      console.log(`Started dragging task ${task.id} from pane ${paneId}`);
+      return { type: ITEM_TYPE, taskId: task.id, paneId };
+    },
+    end: (item, monitor) => {
+      const dropResult = monitor.getDropResult();
+      console.log('Drag ended', item, dropResult);
+    },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
-  
-  // Set up the drop target
-  const [{ isOver }, drop] = useDrop({
-    accept: ITEM_TYPE,
-    drop: (item: DragItem) => {
-      if (item.paneId !== paneId) {
-        onMove(item.taskId, item.paneId, paneId);
-      }
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  });
-  
-  // Combine drag and drop refs
-  const ref = (node: HTMLDivElement) => {
-    drag(node);
-    drop(node);
-  };
-  
+
+  // Connect the drag ref to our element ref
+  dragRef(ref);
+
   return (
     <div 
       ref={ref}
-      className={`pane-tab ${isActive ? 'active' : ''} ${isDragging ? 'dragging' : ''} ${isOver ? 'drop-target' : ''}`}
+      className={`pane-tab ${isActive ? 'active' : ''} ${isDragging ? 'dragging' : ''}`}
       onClick={onActivate}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
     >
       <span>{task.title}</span>
       <button 
