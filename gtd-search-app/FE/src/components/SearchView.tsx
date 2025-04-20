@@ -70,10 +70,10 @@ const SearchView: React.FC<SearchViewProps> = ({
           searchParams={searchParams} 
           onSearchChange={onSearchChange} 
         />
-        <FilterPanel 
+        {/* <FilterPanel 
           searchParams={searchParams} 
           onFilterChange={handleFilterChange} 
-        />
+        /> */}
       </div>
       
       <div className="search-results">
