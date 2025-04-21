@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from datetime import datetime
 from sqlmodel import Session, select
+from sqlalchemy import text
+
 
 from app.database import get_db, engine
 from app.models.todo import Todo, TodoSearch
@@ -13,54 +15,43 @@ def search_todos(
     search_params: TodoSearch = Depends(),
     db: Session = Depends(get_db)
 ):
-    # If we have a text search query, use the raw SQL approach
+    # If we have a text search query, use SQLModel with text() for the search part
     if search_params.query:
-        # Start with a base query
-        query = """
-        SELECT * FROM prod.fact_todos
-        WHERE 1=1
-        """
-        params = {}
         
-        # Add text search
-        query += """
-        AND search @@ websearch_to_tsquery('english', :query)
-        ORDER BY ts_rank(search, websearch_to_tsquery('english', :query)) DESC
-        """
-        params["query"] = search_params.query
+        # Start building the query with SQLModel
+        statement = select(Todo)
         
-        # Add other filters
+        # Add text search condition using text()
+        search_condition = text("search @@ websearch_to_tsquery('english', :query)")
+        statement = statement.where(search_condition)
+        
+        # Add other filters using SQLModel syntax
         if search_params.list_name:
-            query += " AND todo_list_name = :list_name"
-            params["list_name"] = search_params.list_name
+            statement = statement.where(Todo.todo_list_name == search_params.list_name)
         
         if search_params.folder_name:
-            query += " AND todo_folder_name = :folder_name"
-            params["folder_name"] = search_params.folder_name
+            statement = statement.where(Todo.todo_folder_name == search_params.folder_name)
         
         if search_params.status:
-            query += " AND status_id = :status"
-            params["status"] = search_params.status
+            statement = statement.where(Todo.todo_status == search_params.status)
         
         if search_params.completed is not None:
-            query += " AND todo_status = :completed"
-            params["completed"] = "1" if search_params.completed else "0"
+            completed_value = "1" if search_params.completed else "0"
+            statement = statement.where(Todo.todo_status == completed_value)
+        
+        # Add ordering by rank using text()
+        rank_order = text("ts_rank(search, websearch_to_tsquery('english', :query)) DESC")
+        statement = statement.order_by(rank_order)
         
         # Add pagination
-        query += " LIMIT :limit OFFSET :offset"
-        params["limit"] = search_params.page_size
-        params["offset"] = (search_params.page - 1) * search_params.page_size
+        statement = statement.offset((search_params.page - 1) * search_params.page_size)
+        statement = statement.limit(search_params.page_size)
         
-        from sqlalchemy import text
-        result = db.execute(text(query), params).fetchall()
+        # Execute the query with parameters
+        params = {"query": search_params.query}
+        results = db.exec(statement.params(**params)).all()
         
-        # Convert to Todo objects
-        todos = []
-        for row in result:
-            todo_dict = dict(row._mapping)
-            todos.append(Todo.model_validate(todo_dict))
-        
-        return todos
+        return list(results)
     
     # If no text search, use SQLModel's ORM approach
     else:
@@ -91,11 +82,10 @@ def search_todos(
 
 @router.get("/todos/{todo_id}", response_model=Todo)
 def get_todo(todo_id: str, db: Session = Depends(get_db)):
-    with Session(engine) as session:
-        statement = select(Todo).where(Todo.todo_id == todo_id)
-        result = session.exec(statement).first()
-    
-        if not result:
-            raise HTTPException(status_code=404, detail="Todo not found")
-    
-        return result
+    statement = select(Todo).where(Todo.todo_id == todo_id)
+    result = db.exec(statement).first()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Todo not found")
+
+    return result
