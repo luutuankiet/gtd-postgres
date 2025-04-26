@@ -8,6 +8,7 @@ import './App.css';  // Make sure this exists
 import './workspace.css';  // Make sure this exists
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useSearch } from './hooks/useSearch';
 
 
 
@@ -16,10 +17,11 @@ const App: React.FC = () => {
   
   const [currentView, setCurrentView] = useState<'search' | 'workspace'>('search');
   const [tasks, setTasks] = useState<Task[]>(dummyTasks); // Initialize with dummy tasks
-  const [searchParams, setSearchParams] = useState<SearchParams>({
-    query: '',
-    filters: {}
-  });
+  // const [searchParams, setSearchParams] = useState<SearchParams>({
+  //   query: '',
+  //   filters: {}
+  // });
+  const { results, loading, error, searchParams, setSearchParams } = useSearch()
   
   console.log('Dummy tasks:', tasks); // This should now show the dummy tasks
   // Initialize workspace with a single empty pane group
@@ -77,7 +79,7 @@ const App: React.FC = () => {
         <main>
           {currentView === 'search' ? (
             <SearchView 
-              tasks={tasks}
+              tasks={results}
               searchParams={searchParams}
               onSearchChange={setSearchParams}
               onAddToWorkspace={addTaskToWorkspace}

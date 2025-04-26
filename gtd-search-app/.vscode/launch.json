@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "FE",
+            "port": 9222,
+            "request": "attach",
+            "type": "chrome",
+            "webRoot": "${workspaceFolder}/FE/src"
+        },
+        {
+            "name": "BE",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/BE/app/main.py",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/BE/.env",
+            "python": "${workspaceFolder}/BE/.venv/bin/python"
+        }
+    ]
+}
