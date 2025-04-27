@@ -39,6 +39,9 @@ def search_todos(
             completed_value = "1" if search_params.completed else "0"
             statement = statement.where(Todo.todo_status == completed_value)
         
+        if not search_params.status:
+            statement = statement.where(Todo.todo_status != "2")
+        
         # Add ordering by rank using text()
         rank_order = text("ts_rank(search, websearch_to_tsquery('english', :query)) DESC")
         statement = statement.order_by(rank_order)
@@ -50,6 +53,7 @@ def search_todos(
         # Execute the query with parameters
         params = {"query": search_params.query}
         results = db.exec(statement.params(**params)).all()
+        # [result['todo_tags_list'] result.name for result in results]
         
         return list(results)
     

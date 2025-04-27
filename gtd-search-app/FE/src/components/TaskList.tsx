@@ -1,5 +1,6 @@
 import React from 'react';
 import { Task } from '../types';
+import ReactMarkdown from 'react-markdown';
 
 interface TaskListProps {
   tasks: Task[];
@@ -39,7 +40,9 @@ const TaskList: React.FC<TaskListProps> = ({
             </div>
             <div className="task-meta">
               <span className={`status status-${task.status}`}>{task.status}</span>
-              <span className={`priority priority-${task.priority}`}>{task.priority}</span>
+              <div className='content-wrapper'>
+                <ReactMarkdown>{task.content}</ReactMarkdown>
+              </div>
               {task.dueDate && (
                 <span className="due-date">
                   Due: {new Date(task.dueDate).toLocaleDateString()}

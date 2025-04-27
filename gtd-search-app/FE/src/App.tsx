@@ -23,7 +23,6 @@ const App: React.FC = () => {
   // });
   const { results, loading, error, searchParams, setSearchParams } = useSearch()
   
-  console.log('Dummy tasks:', tasks); // This should now show the dummy tasks
   // Initialize workspace with a single empty pane group
   const [workspace, setWorkspace] = useState<WorkspaceState>({
     openTasks: [],
@@ -88,7 +87,7 @@ const App: React.FC = () => {
             />
           ) : (
             <WorkspaceView 
-              tasks={tasks}
+              tasks={results}
               workspace={workspace}
               setWorkspace={setWorkspace}
               onNavigateToSearch={navigateToSearch}

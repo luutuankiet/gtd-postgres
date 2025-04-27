@@ -54,13 +54,13 @@ export const convertApiTaskToTask = (apiTask: any): Task => {
   return {
     id: apiTask.todo_id,
     title: apiTask.todo_title,
-    content: apiTask.todo_content,
+    content: apiTask.todo_content.replace(/\\n/g, '  \n'),
     status: apiTask.todo_status,
     priority: apiTask.todo_priority || 'medium',
     dueDate: apiTask.todo_due_date,
     folder: apiTask.todo_folder_name,
     list: apiTask.todo_list_name,
-    tags: apiTask.todo_tags || [],
+    tags: apiTask.todo_tags_list || [],
     createdAt: apiTask.todo_created_at,
     updatedAt: apiTask.todo_updated_at,
   };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Task } from '../types';
+import ReactMarkdown from 'react-markdown';
 
 interface TaskDetailProps {
   task: Task | null;
@@ -26,10 +27,12 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
           </span>
         </div>
         
-        <div className="meta-item">
-          <span className="meta-label">Priority:</span>
-          <span className={`meta-value priority-${task.priority}`}>
-            {task.priority}
+        <div className="task-detail-tags">
+          <span className="tags-label">Tags:</span>
+          <span className="tags-list">
+            {task.tags.map(tag => (
+              <span key={tag} className="tag">{tag}</span>
+            ))}
           </span>
         </div>
         
@@ -56,18 +59,12 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ task, onClose }) => {
       <div className="task-detail-content">
         <h3>Description</h3>
         <div className="content-body">
-          {task.content}
+          <ReactMarkdown>
+            {task.content}
+          </ReactMarkdown>
         </div>
       </div>
       
-      <div className="task-detail-tags">
-        <h3>Tags</h3>
-        <div className="tags-list">
-          {task.tags.map(tag => (
-            <span key={tag} className="tag">{tag}</span>
-          ))}
-        </div>
-      </div>
       
       <div className="task-detail-dates">
         <div className="date-item">

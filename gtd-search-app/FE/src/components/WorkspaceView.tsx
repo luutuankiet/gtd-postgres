@@ -3,7 +3,6 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { v4 as uuidv4 } from 'uuid';
 import PaneGroupComponent from './PaneGroup';
-import TaskDetail from './TaskDetail';
 import { Task, WorkspaceState, PaneGroup } from '../types';
 
 interface WorkspaceViewProps {

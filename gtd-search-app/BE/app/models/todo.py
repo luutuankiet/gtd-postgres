@@ -1,6 +1,8 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional, List
+from pydantic import BaseModel, computed_field
 from datetime import datetime
+import re
 
 # Basic Todo model for responses
 class Todo(SQLModel, table=True):
@@ -13,7 +15,16 @@ class Todo(SQLModel, table=True):
     todo_folder_name: Optional[str] = None
     todo_status: Optional[str] = None
     todo_duedate: Optional[datetime] = None
-    todo_tags: Optional[str] = None
+    todo_tags: Optional[str]
+    
+
+
+    @computed_field
+    @property
+    def todo_tags_list(self) -> list:
+        matches = re.findall(r"'([^']*)'", self.todo_tags)
+        return matches
+       
 
 # Search parameters model
 class TodoSearch(SQLModel):
@@ -24,3 +35,4 @@ class TodoSearch(SQLModel):
     completed: Optional[bool] = None
     page: int = 1
     page_size: int = 20
+    status: Optional[str] = None
